@@ -18,15 +18,15 @@ on:
       TARGET:
         description: 'Which partition you want to sign?'
         required: true
-        default: 'boot'
+        default: 'dtb'
       SIZE:
         description: 'What is your boot/recovery PARTITION(not image) size?(size unit is bytes)'
         required: true
-        default: '36700160'
+        default: '8388608'
       VER:
         description: 'What is your Android version? (For padding DHTB header to vbmeta)'
         required: true
-        default: '8'
+        default: '9'
         type: choice
         options:
         - '8'
@@ -56,15 +56,11 @@ jobs:
           wget "${{ github.event.inputs.BOOT_URL }}" -O ./aik/${{ github.event.inputs.TARGET }}.img
           wget "${{ github.event.inputs.VBM_URL }}" -O ./avbtool/vbmeta.img
           
-      - name: Remove invalid content in your image
-        run: |
-          ./unpackimg.sh ${{ github.event.inputs.TARGET }}.img
-          ./repackimg.sh
-          cp -v *-new.img ../avbtool/${{ github.event.inputs.TARGET }}.img
-        working-directory: aik
+      
 
       - name: Sign the image
         run: |
+          cp -v ../aik/${{ github.event.inputs.TARGET }}.img ${{ github.event.inputs.TARGET }}.img
           echo "Generate vbmeta sign script..."
           ./scriptgen vbmeta.img
           chmod -v 755 sign_vbmeta.sh
